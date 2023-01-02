@@ -1,0 +1,133 @@
+# LoongArch CPU ISA extensions.
+
+config BR2_LOONGARCH_ISA_LSX
+	bool
+
+config BR2_LOONGARCH_ISA_LASX
+	bool
+
+config BR2_LOONGARCH_EXT
+	bool "Extension Support"
+	help
+	  Enable this option if your LoongArch core has a extension (LSX or LASX).
+
+if BR2_LOONGARCH_EXT
+
+comment "Instruction Set Extensions"
+
+config BR2_LOONGARCH_ISA_HAS_LSX
+	bool "Loongson simd extension(LSX)"
+	select BR2_LOONGARCH_ISA_LSX
+
+config BR2_LOONGARCH_ISA_HAS_LASX
+	bool "Loongson adanvce simd extension(LASX)"
+	select BR2_LOONGARCH_ISA_LASX
+
+endif
+
+choice
+	prompt "Target Architecture Size"
+	default BR2_LOONGARCH_64
+
+config BR2_LOONGARCH_32
+	bool "32-bit"
+	select BR2_ARCH_IS_32
+
+config BR2_LOONGARCH_64
+	bool "64-bit"
+	select BR2_ARCH_IS_64
+
+endchoice
+
+config BR2_LOONGARCH_USE_MMU
+	bool "MMU support"
+	default y
+	depends on BR2_LOONGARCH_64
+	select BR2_USE_MMU
+	help
+	  Enable this option if your LoongArch core has a MMU (Memory
+	  Management Unit).
+
+config BR2_LOONGARCH_SOFT_FLOAT
+        bool "Use soft-float"
+        select BR2_SOFT_FLOAT
+        help
+          If your target CPU does not have a Floating Point Unit (FPU)
+          or a kernel FPU emulator, but you still wish to support
+          floating point functions, then everything will need to be
+          compiled with soft floating point support (-msoft-float).
+
+choice
+        prompt "FP mode"
+        default BR2_LOONGARCH_FP32_MODE_64
+        depends on !BR2_LOONGARCH_SOFT_FLOAT
+        help
+          LoongArch supports different FP modes (32,64). Information
+          about FP modes can be found here:
+	  https://gcc.gnu.org/onlinedocs/gcc/LoongArch-Options.html
+
+config BR2_LOONGARCH_FP32_MODE_32
+        bool "32"
+
+config BR2_LOONGARCH_FP32_MODE_64
+        bool "64"
+endchoice
+
+
+choice
+	prompt "Target ABI"
+	default BR2_LOONGARCH_ABI_ILP32D if BR2_ARCH_IS_32 && BR2_LOONGARCH_FP32_MODE_64
+	default BR2_LOONGARCH_ABI_ILP32F if BR2_ARCH_IS_32 && BR2_LOONGARCH_FP32_MODE_32
+	default BR2_LOONGARCH_ABI_ILP32S if BR2_ARCH_IS_32
+	default BR2_LOONGARCH_ABI_LP64D  if BR2_ARCH_IS_64 && BR2_LOONGARCH_FP32_MODE_64
+	default BR2_LOONGARCH_ABI_LP64F  if BR2_ARCH_IS_64 && BR2_LOONGARCH_FP32_MODE_32
+	default BR2_LOONGARCH_ABI_LP64S  if BR2_ARCH_IS_64
+
+config BR2_LOONGARCH_ABI_ILP32S
+	bool "ilp32s"
+	depends on !BR2_ARCH_IS_64
+
+config BR2_LOONGARCH_ABI_ILP32F
+	bool "ilp32f"
+	depends on !BR2_ARCH_IS_64
+
+config BR2_LOONGARCH_ABI_ILP32D
+	bool "ilp32d"
+	depends on !BR2_ARCH_IS_64
+
+config BR2_LOONGARCH_ABI_LP64S
+	bool "lp64s"
+	depends on BR2_ARCH_IS_64
+
+config BR2_LOONGARCH_ABI_LP64F
+	bool "lp64f"
+	depends on BR2_ARCH_IS_64
+
+config BR2_LOONGARCH_ABI_LP64D
+	bool "lp64d"
+	depends on BR2_ARCH_IS_64
+endchoice
+
+config BR2_ARCH
+	default "loongarch32" if !BR2_ARCH_IS_64
+	default "loongarch64" if BR2_ARCH_IS_64
+
+config BR2_NORMALIZED_ARCH
+	default "loongarch"
+
+config BR2_ENDIAN
+	default "LITTLE"
+
+config BR2_GCC_TARGET_ABI
+	default "ilp32s" if BR2_LOONGARCH_ABI_ILP32S
+	default "ilp32f" if BR2_LOONGARCH_ABI_ILP32F
+	default "ilp32d" if BR2_LOONGARCH_ABI_ILP32D
+	default "lp64s" if BR2_LOONGARCH_ABI_LP64S
+	default "lp64f" if BR2_LOONGARCH_ABI_LP64F
+	default "lp64d" if BR2_LOONGARCH_ABI_LP64D
+
+config BR2_READELF_ARCH_NAME
+	default "LoongArch"
+
+# vim: ft=kconfig
+# -*- mode:kconfig; -*-

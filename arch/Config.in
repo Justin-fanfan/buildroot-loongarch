@@ -77,6 +77,15 @@ config BR2_i386
 	  Intel i386 architecture compatible microprocessor
 	  http://en.wikipedia.org/wiki/I386
 
+config BR2_loongarch
+	bool "LoongArch"
+	select BR2_ARCH_NEEDS_GCC_AT_LEAST_12
+	help
+	  LoongArch is a RISC architecture created by Loongson. Little endian.
+	  http://www.loongson.cn/
+	  http://en.wikipedia.org/wiki/LoongArch
+
+
 config BR2_m68k
 	bool "m68k"
 	# MMU support is set by the subarchitecture file, arch/Config.in.m68k
@@ -372,6 +381,10 @@ endif
 
 if BR2_arm || BR2_armeb || BR2_aarch64 || BR2_aarch64_be
 source "arch/Config.in.arm"
+endif
+
+if BR2_loongarch
+source "arch/Config.in.loongarch"
 endif
 
 if BR2_m68k
