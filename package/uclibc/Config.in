@@ -7,6 +7,7 @@ config BR2_PACKAGE_UCLIBC_ARCH_SUPPORTS
 	default y if BR2_arm
 	default y if BR2_armeb
 	default y if BR2_i386
+	default y if BR2_loongarch
 	default y if BR2_m68k
 	default y if BR2_microblaze
 	default y if BR2_mips
