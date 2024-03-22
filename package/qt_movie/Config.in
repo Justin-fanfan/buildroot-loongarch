@@ -1,0 +1,20 @@
+config BR2_PACKAGE_QT_MOVIE
+	bool "qt movie demo"
+	default y
+	depends on BR2_PACKAGE_QT5
+	depends on BR2_PACKAGE_QT5BASE
+	help
+		change by LSGD
+		Qt movie demo
+		will auto play run path logo.gif
+		install in /root/logo_player/
+		name is logo_player
+
+config BR2_PACKAGE_QT_MOVIE_AUTOBOOT
+	bool "qt movie auto run agter boot"
+	default y
+	depends on BR2_PACKAGE_QT_MOVIE
+	help
+		auto run logo_player after boot
+		to show LSGD logo.gif
+

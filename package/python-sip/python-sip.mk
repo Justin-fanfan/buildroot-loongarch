@@ -33,6 +33,7 @@ define PYTHON_SIP_CONFIGURE_CMDS
 			--incdir $(STAGING_DIR)/usr/include/python$(PYTHON3_VERSION_MAJOR) \
 			--sipdir $(TARGET_DIR)/usr/share/sip \
 			--sysroot $(STAGING_DIR)/usr \
+			--sip-module=PyQt5.sip \
 			--no-stubs \
 			--use-qmake && \
 		$(HOST_DIR)/bin/qmake)

@@ -1,0 +1,8 @@
+config BR2_PACKAGE_PYTHON_W1THERMSENSOR
+	bool "python-w1thermsensor"
+	help
+	  A Python package and CLI tool to work with w1 temperature sensors
+	  like DS1822, DS18S20 & DS18B20
+	  on the Raspberry Pi, Beagle Bone and other devices.
+
+	  https://pypi.org/project/w1thermsensor

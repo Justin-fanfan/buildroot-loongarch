@@ -19,6 +19,17 @@ config BR2_PACKAGE_DHCP_SERVER
 	  query, and possibly change, the server's state via the Object
 	  Management API (OMAPI).
 
+config BR2_PACKAGE_DHCP_SERVER_DISABLE
+	bool "dhcp server disable"
+	depends on BR2_PACKAGE_DHCP_SERVER
+	default y
+	help
+	  DHCP server from the ISC DHCP distribution.
+
+	  but when not a runable conf file,
+	  systemd server will report boot failed so that user will have a doubt.
+	  so enable this systemd server after user customized conf file maybe better.
+
 config BR2_PACKAGE_DHCP_SERVER_DELAYED_ACK
 	bool "Enable delayed ACK feature"
 	depends on BR2_PACKAGE_DHCP_SERVER

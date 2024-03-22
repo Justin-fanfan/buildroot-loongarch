@@ -1,0 +1,48 @@
+config BR2_PACKAGE_LS_DEFAULT_ETH_CONFIG
+	bool "loongson default config eth dev"
+	depends on BR2_PACKAGE_NETWORK_MANAGER || BR2_PACKAGE_IFUPDOWN_SCRIPTS
+	default n
+	help
+		if want to set deafult eth dev ip
+		can select this option
+		and custom BR2_PACKAGE_LS_DEFAULT_ETH_NAME and BR2_PACKAGE_LS_DEFAULT_ETH_IP value
+if BR2_PACKAGE_LS_DEFAULT_ETH_CONFIG
+
+config BR2_PACKAGE_LS_DEFAULT_ETH_NAME
+	string "eth dev name list"
+	depends on BR2_PACKAGE_LS_DEFAULT_ETH_CONFIG
+	default "eth0"
+	help
+		this work by BR2_PACKAGE_LS_DEFAULT_ETH_IP
+		just set up board default eth dev ip after system boot
+		e.g.
+		default value
+		will let board eth0 dev ip set to be 192.168.10 after boot
+		if use NetworkManger to set
+		you can use nmtui to change this defconfig
+		if use Network (ifupdown scripts package)
+		you can change /etc/network/interfaces file
+		if you want to set two or more dev ip
+		you can set this value like
+		eth0 eht1
+
+config BR2_PACKAGE_LS_DEFAULT_ETH_IP
+	string "eth dev ip list"
+	depends on BR2_PACKAGE_LS_DEFAULT_ETH_CONFIG
+	default "192.168.1.10"
+	help
+		this work by BR2_PACKAGE_LS_DEFAULT_ETH_NAME
+		just set up board default eth dev ip after system boot
+		e.g.
+		default value
+		will let board eth0 dev ip set to be 192.168.10 after boot
+		if use NetworkManger to set
+		you can use nmtui to change this defconfig
+		if use Network (ifupdown scripts package)
+		you can change /etc/network/interfaces file
+		if you want to set two or more dev ip
+		you can set this value like
+		192.168.1.10 192.168.2.11
+
+endif
+

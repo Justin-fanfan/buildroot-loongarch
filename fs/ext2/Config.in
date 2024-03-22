@@ -29,6 +29,30 @@ config BR2_TARGET_ROOTFS_EXT2_4
 
 endchoice
 
+config BR2_TARGET_ROOTFS_IMG
+	bool "img root filesystem"
+	depends on BR2_TARGET_ROOTFS_EXT2_4
+	default y
+
+config BR2_TARGET_ROOTFS_IMG_WITH_PARTITION
+	bool "img with partition"
+	depends on BR2_TARGET_ROOTFS_IMG
+	default y
+	help
+	  if select this must use BR2_TARGET_ROOTFS_IMG_WITH_PARTITION_SIZE
+	  as the size of the filesystem image
+	  BR2_TARGET_ROOTFS_EXT2_SIZE is unused
+	  and unit is M (default 512M)
+	  and must use number
+
+config BR2_TARGET_ROOTFS_IMG_WITH_PARTITION_SIZE
+	int "M about img size"
+	depends on BR2_TARGET_ROOTFS_IMG_WITH_PARTITION
+	default 512
+	help
+	  unit is M (default 512M)
+	  and must use number
+
 config BR2_TARGET_ROOTFS_EXT2_GEN
 	int
 	default 2 if BR2_TARGET_ROOTFS_EXT2_2
@@ -148,6 +172,11 @@ config BR2_TARGET_ROOTFS_EXT2_ZSTD
 	bool "zstd"
 	help
 	  Do compress the ext2 filesystem with zstd.
+
+config BR2_TARGET_ROOTFS_EXT2_PIGZ
+	bool "pigz"
+	help
+	  Do compress the ext2 filesystem with pigz.
 
 endchoice
 

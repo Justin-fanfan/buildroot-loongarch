@@ -234,18 +234,57 @@ define BUSYBOX_SET_INIT
 endef
 
 ifeq ($(BR2_TARGET_GENERIC_GETTY),y)
+ifeq ($(BR2_TARGET_GENERIC_GETTY_AUTOLOGIN),y)
+define BUSYBOX_SET_GETTY
+	$(SED) '/# GENERIC_SERIAL$$/s~^.*#~$(SYSTEM_GETTY_PORT)::respawn:/sbin/getty -L $(SYSTEM_GETTY_OPTIONS) $(SYSTEM_GETTY_PORT) $(SYSTEM_GETTY_BAUDRATE) $(SYSTEM_GETTY_TERM) -l ls-autologin -n #~' \
+		$(TARGET_DIR)/etc/inittab
+endef
+else
 define BUSYBOX_SET_GETTY
 	$(SED) '/# GENERIC_SERIAL$$/s~^.*#~$(SYSTEM_GETTY_PORT)::respawn:/sbin/getty -L $(SYSTEM_GETTY_OPTIONS) $(SYSTEM_GETTY_PORT) $(SYSTEM_GETTY_BAUDRATE) $(SYSTEM_GETTY_TERM) #~' \
 		$(TARGET_DIR)/etc/inittab
+endef
+endif # BR2_TARGET_GENERIC_GETTY_AUTOLOGIN
+
+else
+ifeq ($(BR2_TARGET_GENERIC_GETTY_AUTOLOGIN),y)
+define BUSYBOX_SET_GETTY
+	$(SED) '/# GENERIC_SERIAL$$/s~^.*#~#ttyS0::respawn:/sbin/getty -L ttyS0 115200 vt100 -l ls-autologin -n #~' $(TARGET_DIR)/etc/inittab
 endef
 else
 define BUSYBOX_SET_GETTY
 	$(SED) '/# GENERIC_SERIAL$$/s~^.*#~#ttyS0::respawn:/sbin/getty -L ttyS0 115200 vt100 #~' $(TARGET_DIR)/etc/inittab
 endef
+endif # BR2_TARGET_GENERIC_GETTY_AUTOLOGIN
 endif # BR2_TARGET_GENERIC_GETTY
+
+ifeq ($(BR2_TARGET_TTY0_GETTY_ENABLE),y)
+ifeq ($(BR2_TARGET_GENERIC_GETTY_AUTOLOGIN),y)
+define BUSYBOX_SET_GETTY_TTY0
+	$(SED) '/# tty0-console$$/d' $(TARGET_DIR)/etc/inittab
+	$(SED) '/^ttyS*/a tty0::respawn:/sbin/getty -L $(SYSTEM_GETTY_OPTIONS) tty0 $(SYSTEM_GETTY_BAUDRATE) $(SYSTEM_GETTY_TERM) -l ls-autologin -n # tty0-console' \
+			$(TARGET_DIR)/etc/inittab
+endef
+else
+define BUSYBOX_SET_GETTY_TTY0
+	$(SED) '/# tty0-console$$/d' $(TARGET_DIR)/etc/inittab
+	$(SED) '/^ttyS*/a tty0::respawn:/sbin/getty -L $(SYSTEM_GETTY_OPTIONS) tty0 $(SYSTEM_GETTY_BAUDRATE) $(SYSTEM_GETTY_TERM) # tty0-console' \
+			$(TARGET_DIR)/etc/inittab
+endef
+endif # BR2_TARGET_GENERIC_GETTY_AUTOLOGIN
+else
+define BUSYBOX_SET_GETTY_TTY0
+	$(SED) '/# tty0-console$$/d' $(TARGET_DIR)/etc/inittab
+endef
+endif # BR2_TARGET_TTY0_GETTY_ENABLE
+
 BUSYBOX_TARGET_FINALIZE_HOOKS += BUSYBOX_SET_GETTY
 
+BUSYBOX_TARGET_FINALIZE_HOOKS += BUSYBOX_SET_GETTY_TTY0
+
 BUSYBOX_TARGET_FINALIZE_HOOKS += SYSTEM_REMOUNT_ROOT_INITTAB
+
+BUSYBOX_TARGET_FINALIZE_HOOKS += BUSYBOX_SET_AUTO_LOGIN
 
 endif # BR2_INIT_BUSYBOX
 
@@ -417,6 +456,21 @@ define BUSYBOX_BUILD_CMDS
 	$(BUSYBOX_MAKE_ENV) $(MAKE) $(BUSYBOX_MAKE_OPTS) -C $(@D)
 endef
 
+ifeq ($(BR2_INIT_SYSTEMD),y)
+define CHANGE_LINUXRC_INIT_CMDS
+	cd $(TARGET_DIR) && rm linuxrc && ln -s /sbin/init linuxrc
+endef
+else
+define CHANGE_LINUXRC_INIT_CMDS
+endef
+endif
+
+ifeq ($(BR2_BUSYBOX_PROFILE), y)
+define BUSYBOX_INSTALL_ETC_PROFILE
+        cp $(@D)/profile $(TARGET_DIR)/etc/profile
+endef
+endif
+
 define BUSYBOX_INSTALL_TARGET_CMDS
 	# Use the 'noclobber' install rule, to prevent BusyBox from overwriting
 	# any full-blown versions of apps installed by other packages.
@@ -426,6 +480,8 @@ define BUSYBOX_INSTALL_TARGET_CMDS
 	$(BUSYBOX_INSTALL_UDHCPC_SCRIPT)
 	$(BUSYBOX_INSTALL_ZCIP_SCRIPT)
 	$(BUSYBOX_INSTALL_MDEV_CONF)
+	$(CHANGE_LINUXRC_INIT_CMDS)
+	$(BUSYBOX_INSTALL_ETC_PROFILE)
 endef
 
 # Install the sysvinit scripts, for the moment, but not those that already

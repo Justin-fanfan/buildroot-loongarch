@@ -1,0 +1,5 @@
+config BR2_PACKAGE_PYTHON_RPI_GPIO_LS
+	bool "python-RPi.GPIO(LS Ver)"
+	help
+	  A module to control Raspberry Pi GPIO channels
+	  Change by LSGD to support multi board

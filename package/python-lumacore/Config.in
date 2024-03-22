@@ -1,0 +1,12 @@
+config BR2_PACKAGE_PYTHON_LUMACORE
+	bool "python-luma.core"
+	select BR2_PACKAGE_PYTHON_PILLOW # runtime
+	select BR2_PACKAGE_PYTHON_SMBUS2 # runtime
+	select BR2_PACKAGE_PYTHON_PYFTDI # runtime
+	select BR2_PACKAGE_PYTHON_CBOR2 # runtime
+	select BR2_PACKAGE_PYTHON_RPI_GPIO_LS # runtime
+	select BR2_PACKAGE_PYTHON_SPIDEV # runtime
+	help
+	  A component library to support SBC display drivers
+
+	  https://pypi.org/project/luma.core

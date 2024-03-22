@@ -19,3 +19,5 @@ config BR2_PACKAGE_LIBXKBCOMMON_TOOLS
 	  xkbcli-interactive-wayland
 
 endif
+
+source "package/libxkbcommon_rules/Config.in"

@@ -1,0 +1,9 @@
+config BR2_PACKAGE_QT_USE_TSLIB
+	bool "Qt version use tslib"
+	depends on BR2_PACKAGE_QT5
+	depends on BR2_PACKAGE_QT5BASE
+	default n
+	help
+		if your Qt version need use tslib enable otherwise disable it.
+		if usb tslib should export QT_QPA_FB_TSLIB=1 so that tslib run better
+

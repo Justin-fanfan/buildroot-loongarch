@@ -1,0 +1,7 @@
+config BR2_PACKAGE_PYTHON_GEVENT
+	bool "python-gevent"
+	select BR2_PACKAGE_PYTHON_GREENLET
+	help
+	  Python binding to the gevent
+
+	  https://pypi.org/project/gevent/

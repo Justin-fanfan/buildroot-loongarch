@@ -4,6 +4,7 @@
 /.config.old
 /..config.tmp
 /.config
+/dl/*/.lock
 *.depend
 *.o
 /*.patch

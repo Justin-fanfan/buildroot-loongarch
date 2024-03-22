@@ -1,0 +1,7 @@
+config BR2_PACKAGE_LS2_SYS_CONFIG_TOOL
+	bool "ls2k(embedded system) sys config tool"
+	default y
+	help
+		this is a sofeware for loongson-gd embedded board(just like ls2k)
+		help user to setup board
+		can update uboot kernel rootfs

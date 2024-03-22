@@ -786,6 +786,17 @@ define SYSTEMD_INSTALL_SERVICE_TTY
 		$(SED) 's/115200/$(BR2_TARGET_GENERIC_GETTY_BAUDRATE),115200/' $(TARGET_DIR)/lib/systemd/system/console-getty@.service; \
 		$(SED) 's/115200/$(BR2_TARGET_GENERIC_GETTY_BAUDRATE),115200/' $(TARGET_DIR)/lib/systemd/system/container-getty@.service; \
 	fi
+	if [ "$(BR2_TARGET_GENERIC_GETTY_AUTOLOGIN)" = "y" ] ; \
+	then \
+		$(SED) 's/-o[[:space:]]'"'"'-p[[:space:]]--[[:space:]]\\\\u'"'"'/-a root/' $(TARGET_DIR)/lib/systemd/system/getty@.service; \
+		$(SED) 's/-o[[:space:]]'"'"'-p[[:space:]]--[[:space:]]\\\\u'"'"'/-a root/' $(TARGET_DIR)/lib/systemd/system/serial-getty@.service; \
+		$(SED) 's/-o[[:space:]]'"'"'-p[[:space:]]--[[:space:]]\\\\u'"'"'/-a root/' $(TARGET_DIR)/lib/systemd/system/console-getty.service; \
+		$(SED) 's/-o[[:space:]]'"'"'-p[[:space:]]--[[:space:]]\\\\u'"'"'/-a root/' $(TARGET_DIR)/lib/systemd/system/container-getty@.service; \
+	fi;
+	if [ "$(BR2_TARGET_TTY0_GETTY_ENABLE)" = "y"  ] ; \
+	then \
+		cd $(TARGET_DIR)/lib/systemd/system && ln -sf getty@.service getty@tty0.service; \
+	fi
 endef
 endif
 
@@ -837,8 +848,15 @@ define SYSTEMD_RM_CATALOG_UPDATE_SERVICE
 endef
 SYSTEMD_ROOTFS_PRE_CMD_HOOKS += SYSTEMD_RM_CATALOG_UPDATE_SERVICE
 
+ifeq ($(BR2_PACKAGE_DHCP_SERVER_DISABLE),y)
+define DHCP_SYSTEMD_PRESET_ALL_FOLLOW_CMD
+	rm -rf $(TARGET_DIR)/etc/systemd/system/multi-user.target.wants/dhcpd.service
+endef
+endif
+
 define SYSTEMD_PRESET_ALL
 	$(HOST_DIR)/bin/systemctl --root=$(TARGET_DIR) preset-all
+	$(DHCP_SYSTEMD_PRESET_ALL_FOLLOW_CMD)
 endef
 SYSTEMD_ROOTFS_PRE_CMD_HOOKS += SYSTEMD_PRESET_ALL
 

@@ -1,0 +1,27 @@
+config BR2_PACKAGE_SOURCEHANSERIF
+	bool "source han serif"
+	help
+	  "SiYuanSongTi" is a Song-Ti Style (sans-serif) Chinese fonts
+
+config BR2_PACKAGE_SOURCEHANSERIF_CN_REGULAR
+	bool "source han serif CN regular"
+	depends on BR2_PACKAGE_SOURCEHANSERIF
+	help
+          select CN regular version SiYuanSongTi
+	  file size 13M
+
+config BR2_PACKAGE_SOURCEHANSERIF_CN_REGULAR_SMALL
+	bool "source han serif CN regular small version"
+	depends on BR2_PACKAGE_SOURCEHANSERIF
+	help
+	  sub ori file "CN regular"
+	  13M -> 2.6M
+
+config BR2_PACKAGE_SOURCEHANSERIF_CN_REGULAR_INSTALL_PATH
+	string "install path"
+	depends on BR2_PACKAGE_SOURCEHANSERIF
+	default "/usr/share/fonts"
+	help
+	  select install path
+	  default is /usr/share/fonts
+

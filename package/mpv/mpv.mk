@@ -14,7 +14,7 @@ MPV_LICENSE_FILES = LICENSE.GPL
 MPV_CPE_ID_VENDOR = mpv
 MPV_INSTALL_STAGING = YES
 
-MPV_NEEDS_EXTERNAL_WAF = YES
+# MPV_NEEDS_EXTERNAL_WAF = YES
 
 # Some of these options need testing and/or tweaks
 MPV_CONF_OPTS = \
@@ -226,5 +226,7 @@ endif
 ifeq ($(BR2_TOOLCHAIN_HAS_LIBATOMIC),y)
 MPV_CONF_ENV += LDFLAGS="$(TARGET_LDFLAGS) -latomic"
 endif
+
+MPV_WAF = ./buildtools/bin/waf-2.0.27
 
 $(eval $(waf-package))

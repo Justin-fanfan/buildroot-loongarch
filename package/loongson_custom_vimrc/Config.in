@@ -1,0 +1,7 @@
+config BR2_PACKAGE_LOONGSON_CUSTOM_VIMRC
+	bool "use custom vimrc"
+	depends on BR2_PACKAGE_VIM
+	default y
+	help
+	  custom vimrc
+	  /usr/share/vim/vimrc

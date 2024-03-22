@@ -51,6 +51,11 @@ config BR2_TARGET_ROOTFS_TAR_ZSTD
 	help
 	  Do compress the tarball with zstd.
 
+config BR2_TARGET_ROOTFS_TAR_PIGZ
+	bool "pigz"
+	help
+	  Do compress the tarball with pigz.
+
 endchoice
 
 config BR2_TARGET_ROOTFS_TAR_OPTIONS

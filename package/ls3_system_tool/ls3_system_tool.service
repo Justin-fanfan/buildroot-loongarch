@@ -1,0 +1,13 @@
+[Unit]
+Description=ls3_system_tool(ls_system_tool_qt) Qt version exec
+After=getty@.service
+
+[Service]
+Type=oneshot
+ExecStart=sleep 5.5
+ExecStart=ls_system_tool_qt
+TimeoutSec=0
+RemainAfterExit=no
+
+[Install]
+WantedBy=multi-user.target

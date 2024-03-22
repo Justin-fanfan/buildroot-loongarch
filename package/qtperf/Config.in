@@ -1,0 +1,9 @@
+config BR2_PACKAGE_QTPERF
+	bool "qtperf"
+	default y
+	depends on BR2_PACKAGE_QT5
+	depends on BR2_PACKAGE_QT5BASE
+	help
+		if your system contain qtperf testcase
+		it will build qtperf
+

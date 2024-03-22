@@ -1,0 +1,7 @@
+config BR2_PACKAGE_PYTHON_PYAUDIO
+	bool "python-pyaudio"
+	select BR2_PACKAGE_PORTAUDIO
+	help
+	  Python binding to the pyaudio
+
+	  https://pypi.org/project/PyAudio/

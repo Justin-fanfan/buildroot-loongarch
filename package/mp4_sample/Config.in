@@ -1,0 +1,7 @@
+config BR2_PACKAGE_MP4_SAMPLE
+	bool "sample mp4 video"
+	depends on BR2_PACKAGE_MPV
+	default y
+	help
+		this selection will copy sample mp4 video to /root/mp4_sample
+

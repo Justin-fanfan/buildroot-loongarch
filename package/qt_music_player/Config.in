@@ -1,0 +1,9 @@
+config BR2_PACKAGE_QT_MUSIC_PLAYER
+	bool "qt music player"
+	default y
+	depends on BR2_PACKAGE_QT5
+	depends on BR2_PACKAGE_QT5BASE
+	depends on BR2_PACKAGE_QT5MULTIMEDIA
+	help
+		https://gitee.com/Singtren/qt-music-player
+

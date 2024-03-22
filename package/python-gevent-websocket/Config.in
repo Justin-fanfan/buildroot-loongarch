@@ -1,0 +1,7 @@
+config BR2_PACKAGE_PYTHON_GEVENT_WEBSOCKET
+	bool "python-gevent-websocket"
+	select BR2_PACKAGE_PYTHON_GEVENT
+	help
+	  Python binding to the gevent-websocket
+
+	  https://pypi.org/project/gevent-websocket/

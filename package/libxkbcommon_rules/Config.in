@@ -1,0 +1,13 @@
+config BR2_PACKAGE_LIBXKBCOMMON_RULES
+	bool "libxkbcommon rules"
+	depends on BR2_PACKAGE_LIBXKBCOMMON
+	default y
+	help
+	  xkbcommon is a keymap compiler and support library which
+	  processes a reduced subset of keymaps as defined by the XKB
+	  specification.
+
+	  and if you want to use xkb successfully
+	  you should add xkb rules in /etc/(not only this path but default install in here)
+
+	  http://xkbcommon.org/

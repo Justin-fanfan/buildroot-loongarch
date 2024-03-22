@@ -1,0 +1,12 @@
+config BR2_PACKAGE_QUECTEL_CM
+	bool "quectel-cm"
+	default n
+	help
+		Quectel 4G-Model Connection Manager
+
+config BR2_PACKAGE_QUECTEL_CM_LINK
+	bool "quectel-cm link to /opt/quectel-cm"
+	depends on BR2_PACKAGE_QUECTEL_CM
+	default n
+
+

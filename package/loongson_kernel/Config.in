@@ -1,0 +1,33 @@
+config BR2_PACKAGE_LOONGSON_KERNEL
+	bool "Loongson Linux Kernel"
+	help
+	  Enable this option if you want to put a Linux kernel(uImage)
+	  in /boot dir
+
+config BR2_PACKAGE_LOONGSON_KERNEL_HOSTSITE
+	string "uImage Host site"
+	depends on BR2_PACKAGE_LOONGSON_KERNEL
+	default ""
+
+config BR2_PACKAGE_LOONGSON_KERNEL_USER
+	string "uImage Host User"
+	depends on BR2_PACKAGE_LOONGSON_KERNEL
+	default ""
+
+config BR2_PACKAGE_LOONGSON_KERNEL_PASSWORD
+	string "uImage Host password"
+	depends on BR2_PACKAGE_LOONGSON_KERNEL
+	default ""
+
+config BR2_PACKAGE_LOONGSON_KERNEL_PATH
+	string "uImage file path in host site"
+	depends on BR2_PACKAGE_LOONGSON_KERNEL
+
+config BR2_PACKAGE_LOONGSON_KERNEL_MODULES
+	bool "Loongson Linux Kernel Modules"
+	depends on BR2_PACKAGE_LOONGSON_KERNEL
+	default y
+	help
+	  Enable this option if you want to put kernel objects in /usr/lib/modules
+
+

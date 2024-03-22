@@ -1,0 +1,13 @@
+[Unit]
+Description=driver_testcase Qt version exec
+After=getty@.service
+
+[Service]
+Type=oneshot
+ExecStart=sleep 5.5
+ExecStart=cd /root/logo_player && ./logo_player -platform linuxfb
+TimeoutSec=0
+RemainAfterExit=no
+
+[Install]
+WantedBy=multi-user.target

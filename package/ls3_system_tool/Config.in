@@ -1,0 +1,27 @@
+config BR2_PACKAGE_LS3_SYSTEM_TOOL
+	bool "ls3 system tool loongson"
+	help
+		this is a sofeware or sofeware set work loongson gd board
+		help user to test their's board
+		if you can't build it because you not build in loongson gd net
+		git source unsee in eth
+		you can contact oujintao@loongson.cn for help
+
+config BR2_PACKAGE_LS3_SYSTEM_TOOL_QT
+	bool "build Qt version"
+	depends on BR2_PACKAGE_LS3_SYSTEM_TOOL
+	depends on BR2_PACKAGE_QT5
+	depends on BR2_PACKAGE_QT5BASE
+	help
+		if your system contain Qt
+		it will build a Qt version test case for you
+
+config BR2_PACKAGE_LS3_SYSTEM_TOOL_QT_AUTO_START
+	bool "Qt version auto run after boot"
+	depends on BR2_PACKAGE_LS3_SYSTEM_TOOL_QT
+	depends on BR2_INIT_SYSTEMD || (BR2_INIT_BUSYBOX && BR2_PACKAGE_BOOT_RUN)
+	default n
+	help
+		if your system contain Qt and select build this software Qt version
+		it will set a service which run after boot system to let software exec
+

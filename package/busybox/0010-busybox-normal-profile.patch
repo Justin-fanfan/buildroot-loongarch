@@ -1,0 +1,23 @@
+diff -Nprua busybox-1.36.1-ori/profile busybox-1.36.1/profile
+--- busybox-1.36.1-ori/profile	1970-01-01 08:00:00.000000000 +0800
++++ busybox-1.36.1/profile	2024-10-16 10:58:02.097197129 +0800
+@@ -0,0 +1,19 @@
++export PATH="/bin:/sbin:/usr/bin:/usr/sbin"
++
++if [ "$PS1" ]; then
++	if [ "`id -u`" -eq 0 ]; then
++		export PS1='[\u@\h \W]# '
++	else
++		export PS1='$ '
++	fi
++fi
++
++export EDITOR='/bin/vi'
++
++# Source configuration files from /etc/profile.d
++for i in /etc/profile.d/*.sh ; do
++	if [ -r "$i" ]; then
++		. $i
++	fi
++done
++unset i

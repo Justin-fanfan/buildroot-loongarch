@@ -1,0 +1,13 @@
+config BR2_PACKAGE_BOOT_RUN
+	bool "loongson buildroot system autorun script after boot"
+	depends on BR2_INIT_SYSTEMD || BR2_INIT_BUSYBOX
+	help
+		this will create a service which name is boot_run.service
+		and create a script in /root which name is boot_run.sh
+		so this service will run this script after system boot
+		just like /etc/profile
+		if you don't need it you can run this command
+		'systemctl disable boot_run'
+		if you want to enable this service you can run this command
+		'systemctl enable boot_run'
+

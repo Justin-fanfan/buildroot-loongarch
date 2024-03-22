@@ -1,0 +1,11 @@
+config BR2_PACKAGE_QT_VIRTUAL_KEYBOARD_EMB
+	bool "qt virtual keyboard for emb linux"
+	default y
+	depends on BR2_PACKAGE_QT5
+	depends on BR2_PACKAGE_QT5BASE
+	depends on BR2_PACKAGE_QT5VIRTUALKEYBOARD
+	help
+	  for emb linux virtual board lib
+	  libQt5SoftKeyboardd.so
+	  usage:
+	  add qputenv("QT_IM_MODULE",QByteArray("Qt5Input")); to main.cpp

@@ -1,0 +1,7 @@
+config BR2_PACKAGE_LOONGSON_CUSTOM_TIMESYNCD_CONF
+	bool "use custom timesyncd.conf"
+	depends on BR2_PACKAGE_SYSTEMD
+	default y
+	help
+	  custom timesyncd.conf
+	  /etc/systemd/timesyncd.conf

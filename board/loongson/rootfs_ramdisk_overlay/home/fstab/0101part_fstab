@@ -1,0 +1,5 @@
+# UNCONFIGURED FSTAB FOR BASE SYSTEM
+/dev/sda1 	/ 		ext4		rw,relatime,data=ordered 0 1
+/dev/sda3       none            swap            defaults,pri=-2 0 0
+
+

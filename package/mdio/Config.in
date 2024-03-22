@@ -1,0 +1,9 @@
+config BR2_PACKAGE_MDIO
+	bool "mdio software"
+	default y
+	help
+		this selection will generate mdio sofeware to /usr/bin
+		if selected
+		this sofeware ori code just form net
+		if found what other package can generate mdio
+		you can not select this

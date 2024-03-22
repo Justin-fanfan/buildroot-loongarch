@@ -1,0 +1,24 @@
+diff -Nprua gevent-24.2.1/_setupares.py gevent-24.2.1-LA/_setupares.py
+--- gevent-24.2.1/_setupares.py	2024-04-16 12:13:41.045173000 +0800
++++ gevent-24.2.1-LA/_setupares.py	2024-04-16 12:14:22.773153201 +0800
+@@ -42,7 +42,7 @@ cflags = ('CFLAGS="%s"' % (cflags,)) if
+ ares_configure_command = ' '.join([
+     "(cd ", quoted_dep_abspath('c-ares'),
+     " && if [ -r include/ares_build.h ]; then cp include/ares_build.h include/ares_build.h.orig; fi ",
+-    " && sh ./configure --disable-dependency-tracking -C " + cflags,
++    " && sh ./configure --host=loongarch64 --disable-dependency-tracking -C " + cflags,
+     " && cp src/lib/ares_config.h include/ares_build.h \"$OLDPWD\" ",
+     " && cat include/ares_build.h ",
+     " && if [ -r include/ares_build.h.orig ]; then mv include/ares_build.h.orig include/ares_build.h; fi)",
+diff -Nprua gevent-24.2.1/_setuplibev.py gevent-24.2.1-LA/_setuplibev.py
+--- gevent-24.2.1/_setuplibev.py	2024-04-16 12:14:02.117162000 +0800
++++ gevent-24.2.1-LA/_setuplibev.py	2024-04-16 12:14:19.593154549 +0800
+@@ -28,7 +28,7 @@ LIBEV_EMBED = should_embed('libev')
+ # Configure libev in place
+ libev_configure_command = ' '.join([
+     "(cd ", quoted_dep_abspath('libev'),
+-    " && sh ./configure -C > configure-output.txt",
++    " && sh ./configure --host=loongarch64 -C > configure-output.txt",
+     ")",
+ ])
+ 

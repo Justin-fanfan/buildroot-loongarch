@@ -21,6 +21,14 @@ endif
 HOST_GCC_LICENSE = GPL-2.0, GPL-3.0, LGPL-2.1, LGPL-3.0
 HOST_GCC_LICENSE_FILES = COPYING COPYING3 COPYING.LIB COPYING3.LIB
 
+ifeq ($(BR2_TOOLCHAIN_BUILDROOT_GLIBC),y)
+GCC_STD_LIB_NAME=gnu
+else ifeq ($(BR2_TOOLCHAIN_BUILDROOT_MUSL),y)
+GCC_STD_LIB_NAME=musl
+else
+GCC_STD_LIB_NAME=
+endif
+
 #
 # Xtensa special hook
 #
@@ -357,16 +365,20 @@ define HOST_GCC_INSTALL_WRAPPER_AND_SIMPLE_SYMLINKS
 			;; \
 		*-ar|*-ranlib|*-nm) \
 			ln -snf $$i $(ARCH)-linux$${i##$(GNU_TARGET_NAME)}; \
+			ln -snf $$i $(ARCH)-linux-$(GCC_STD_LIB_NAME)$${i##$(GNU_TARGET_NAME)}; \
 			;; \
 		*cc|*cc-*|*++|*++-*|*cpp|*-gfortran|*-gdc) \
 			rm -f $$i.br_real; \
 			mv $$i $$i.br_real; \
 			ln -sf toolchain-wrapper $$i; \
 			ln -sf toolchain-wrapper $(ARCH)-linux$${i##$(GNU_TARGET_NAME)}; \
+			ln -sf toolchain-wrapper $(ARCH)-linux-$(GCC_STD_LIB_NAME)$${i##$(GNU_TARGET_NAME)}; \
 			ln -snf $$i.br_real $(ARCH)-linux$${i##$(GNU_TARGET_NAME)}.br_real; \
+			ln -snf $$i.br_real $(ARCH)-linux-$(GCC_STD_LIB_NAME)$${i##$(GNU_TARGET_NAME)}.br_real; \
 			;; \
 		*) \
 			ln -snf $$i $(ARCH)-linux$${i##$(GNU_TARGET_NAME)}; \
+			ln -snf $$i $(ARCH)-linux-$(GCC_STD_LIB_NAME)$${i##$(GNU_TARGET_NAME)}; \
 			;; \
 		esac; \
 	done

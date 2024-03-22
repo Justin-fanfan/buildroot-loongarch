@@ -1,0 +1,7 @@
+config BR2_PACKAGE_LOONGSON_CUSTOM_INPUTRC
+	bool "use custom inputrc"
+	depends on BR2_PACKAGE_READLINE
+	default y
+	help
+	  custom inputrc
+	  /etc/inputrc

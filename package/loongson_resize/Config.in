@@ -1,0 +1,10 @@
+config BR2_PACKAGE_LOONGSON_RESIZE
+	bool "loongson system resize rootfs"
+	depends on BR2_INIT_SYSTEMD || BR2_INIT_BUSYBOX
+	select BR2_PACKAGE_PARTED
+	select BR2_PACKAGE_E2FSPROGS_RESIZE2FS
+	help
+		Resize rootfs when first startup, if device parted,
+		rootfs should in last part, otherwise cannot resize
+		rootfs partition
+
