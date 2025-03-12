@@ -5,6 +5,7 @@ config BR2_PACKAGE_QT6_ARCH_SUPPORTS
 	default y if BR2_ARM_CPU_ARMV5 || BR2_ARM_CPU_ARMV6 || BR2_ARM_CPU_ARMV7A || BR2_ARM_CPU_ARMV8A
 	default y if BR2_i386
 	default y if BR2_x86_64
+	default y if BR2_loongarch
 	default y if BR2_mips || BR2_mipsel || BR2_mips64 || BR2_mips64el
 	default y if BR2_powerpc || BR2_powerpc64 || BR2_powerpc64le
 	# sparc 32-bit is supposedly supported, but has issues due to
@@ -44,11 +45,17 @@ menuconfig BR2_PACKAGE_QT6
 if BR2_PACKAGE_QT6
 
 source "package/qt6/qt6base/Config.in"
+source "package/qt6/qt6charts/Config.in"
 source "package/qt6/qt6core5compat/Config.in"
 source "package/qt6/qt6declarative/Config.in"
+source "package/qt6/qt6graphs/Config.in"
 source "package/qt6/qt6languageserver/Config.in"
 source "package/qt6/qt6mqtt/Config.in"
+source "package/qt6/qt6multimedia/Config.in"
 source "package/qt6/qt6opcua/Config.in"
+source "package/qt6/qt6quick3d/Config.in"
+source "package/qt6/qt6quicktimeline/Config.in"
+source "package/qt6/qt6scxml/Config.in"
 source "package/qt6/qt6serialbus/Config.in"
 source "package/qt6/qt6serialport/Config.in"
 source "package/qt6/qt6shadertools/Config.in"

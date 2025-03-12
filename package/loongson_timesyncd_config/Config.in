@@ -1,0 +1,7 @@
+config BR2_PACKAGE_LOONGSON_TIMESYNCD_CONFIG
+	bool "Run 'timedatectl set-ntp 0' when first boot"
+	depends on BR2_PACKAGE_SYSTEMD_TIMESYNCD
+	default y
+	help
+		disable ntp timesync
+

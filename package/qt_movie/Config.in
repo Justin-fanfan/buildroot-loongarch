@@ -11,7 +11,7 @@ config BR2_PACKAGE_QT_MOVIE
 		name is logo_player
 
 config BR2_PACKAGE_QT_MOVIE_AUTOBOOT
-	bool "qt movie auto run agter boot"
+	bool "qt movie auto run after boot"
 	default y
 	depends on BR2_PACKAGE_QT_MOVIE
 	help

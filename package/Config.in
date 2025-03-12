@@ -2923,6 +2923,7 @@ menu "Loongson board software"
 	source "package/loongson_custom_vimrc/Config.in"
 	source "package/loongson_custom_timesyncd_conf/Config.in"
 	source "package/qt_virtual_keyboard_emb/Config.in"
+	source "package/loongson_timesyncd_config/Config.in"
 endmenu
 
 endmenu

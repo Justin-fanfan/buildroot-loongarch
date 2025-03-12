@@ -1,0 +1,12 @@
+[Unit]
+Description=disable ntp when first boot and delete all service and shell script after config
+After=systemd-timesyncd@.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/loongson_timesyncd_config.sh
+TimeoutSec=0
+RemainAfterExit=no
+
+[Install]
+WantedBy=multi-user.target

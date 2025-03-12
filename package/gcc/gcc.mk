@@ -383,6 +383,8 @@ define HOST_GCC_INSTALL_WRAPPER_AND_SIMPLE_SYMLINKS
 		esac; \
 	done
 
+	$(Q)cd $(HOST_DIR) && ln -sf $(ARCH)-$(TARGET_VENDOR)-linux-$(GCC_STD_LIB_NAME) $(ARCH)-linux-$(GCC_STD_LIB_NAME)
+	$(Q)cd $(HOST_DIR) && ln -sf ./$(ARCH)-$(TARGET_VENDOR)-linux-$(GCC_STD_LIB_NAME)/sysroot sysroot
 endef
 
 include $(sort $(wildcard package/gcc/*/*.mk))

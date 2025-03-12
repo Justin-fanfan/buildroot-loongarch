@@ -1,0 +1,25 @@
+From c39414988c227d290101a0235080dcaac119c184 Mon Sep 17 00:00:00 2001
+From: loongson-gd <loongson-gd@loongson.cn>
+Date: Wed, 5 Mar 2025 18:11:42 +0800
+Subject: [PATCH] openxr:Add loongarch support
+
+---
+ src/3rdparty/openxr/src/common/platform_utils.hpp | 2 ++
+ 1 file changed, 2 insertions(+)
+
+diff --git a/src/3rdparty/openxr/src/common/platform_utils.hpp b/src/3rdparty/openxr/src/common/platform_utils.hpp
+index 35369a1..83ede6a 100644
+--- a/src/3rdparty/openxr/src/common/platform_utils.hpp
++++ b/src/3rdparty/openxr/src/common/platform_utils.hpp
+@@ -49,6 +49,8 @@
+ #define XR_ARCH_ABI "armv7a-vfp"
+ #elif defined(__ARM_ARCH_5TE__)
+ #define XR_ARCH_ABI "armv5te"
++#elif defined(__loongarch64)
++#define XR_ARCH_ABI "loongarch64"
+ #elif defined(__mips64)
+ #define XR_ARCH_ABI "mips64"
+ #elif defined(__mips)
+-- 
+2.34.1
+
