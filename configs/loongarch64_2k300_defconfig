@@ -12,6 +12,7 @@ BR2_PACKAGE_HOST_GDB=y
 BR2_PACKAGE_HOST_GDB_TUI=y
 BR2_PACKAGE_HOST_GDB_PYTHON3=y
 BR2_GDB_VERSION_15=y
+BR2_TARGET_OPTIMIZATION="-mtune=loongarch64 -mstrict-align"
 BR2_TARGET_LDFLAGS="-Wl,--copy-dt-needed-entries"
 BR2_CPAN_MIRROR="https://mirrors.tuna.tsinghua.edu.cn/CPAN"
 BR2_SHARED_STATIC_LIBS=y
