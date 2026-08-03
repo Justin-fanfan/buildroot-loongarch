@@ -1,0 +1,12 @@
+config BR2_PACKAGE_PYTHON_SOUNDDEVICE
+	bool python-sounddevice
+	depends on BR2_PACKAGE_PYTHON3
+	depends on BR2_PACKAGE_PYTHON_NUMPY_ARCH_SUPPORTS
+	select BR2_PACKAGE_PYTHON_CFFI
+	select BR2_PACKAGE_PYTHON_NUMPY
+	select BR2_PACKAGE_PORTAUDIO
+	select BR2_PACKAGE_PORTAUDIO_ALSA
+	help
+	  Python bindings for PortAudio.
+
+	  https://python-sounddevice.readthedocs.io/

@@ -1,0 +1,13 @@
+config BR2_PACKAGE_ONNXRUNTIME
+	bool "onnxruntime"
+	depends on BR2_INSTALL_LIBSTDCPP
+	depends on BR2_TOOLCHAIN_HAS_THREADS
+	depends on BR2_USE_MMU
+	depends on BR2_TOOLCHAIN_GCC_AT_LEAST_9
+	help
+	  ONNX Runtime CPU inference library.
+
+	  This package is configured for generic LoongArch64 CPUs
+	  without LSX or LASX.
+
+	  https://onnxruntime.ai/

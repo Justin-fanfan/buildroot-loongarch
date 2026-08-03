@@ -1,0 +1,17 @@
+config BR2_PACKAGE_SHERPA_ONNX
+	bool "sherpa-onnx Python bindings"
+	depends on BR2_PACKAGE_PYTHON3
+	depends on BR2_INSTALL_LIBSTDCPP
+	depends on BR2_TOOLCHAIN_HAS_THREADS
+	depends on BR2_USE_MMU
+	select BR2_PACKAGE_ONNXRUNTIME
+	select BR2_PACKAGE_PYTHON_NUMPY
+	help
+	  Python bindings for sherpa-onnx offline and online speech
+	  recognition, VAD, keyword spotting and related functions.
+
+	  This configuration uses the separately built ONNX Runtime
+	  package and disables TTS, speaker diarization, tests, demo
+	  binaries, WebSocket and GPU support.
+
+	  https://github.com/k2-fsa/sherpa-onnx
