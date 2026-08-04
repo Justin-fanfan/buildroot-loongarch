@@ -118,4 +118,27 @@ endef
 SHERPA_ONNX_POST_INSTALL_TARGET_HOOKS += \
 	SHERPA_ONNX_INSTALL_PURE_PYTHON
 
+# sherpa-onnx installs a private copy of libonnxruntime into its Python
+# package directory. Post-processing that copy can introduce a 4 KiB
+# PT_LOAD segment, which cannot be loaded by the 16 KiB-page kernel.
+# Keep only the canonical copy in /usr/lib.
+define SHERPA_ONNX_USE_SYSTEM_ONNXRUNTIME
+	rm -f \
+		$(TARGET_DIR)$(SHERPA_ONNX_PYTHON_PACKAGE)/lib/libonnxruntime.so \
+		$(TARGET_DIR)$(SHERPA_ONNX_PYTHON_PACKAGE)/lib/libonnxruntime.so.1 \
+		$(TARGET_DIR)$(SHERPA_ONNX_PYTHON_PACKAGE)/lib/libonnxruntime.so.1.17.1
+
+	ln -sf /usr/lib/libonnxruntime.so.1.17.1 \
+		$(TARGET_DIR)$(SHERPA_ONNX_PYTHON_PACKAGE)/lib/libonnxruntime.so.1.17.1
+
+	ln -sf libonnxruntime.so.1.17.1 \
+		$(TARGET_DIR)$(SHERPA_ONNX_PYTHON_PACKAGE)/lib/libonnxruntime.so.1
+
+	ln -sf libonnxruntime.so.1.17.1 \
+		$(TARGET_DIR)$(SHERPA_ONNX_PYTHON_PACKAGE)/lib/libonnxruntime.so
+endef
+
+SHERPA_ONNX_POST_INSTALL_TARGET_HOOKS += \
+	SHERPA_ONNX_USE_SYSTEM_ONNXRUNTIME
+
 $(eval $(cmake-package))
