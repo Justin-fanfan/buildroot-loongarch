@@ -1,0 +1,95 @@
+From: buildroot-2k300 <buildroot@loongson.local>
+Subject: [PATCH] mlas: add generic scalar mode for LoongArch64 without LSX/LASX
+
+Loongson 2K0300 has neither LSX nor LASX. ONNX Runtime 1.17.1 assumes that
+every LoongArch64 CPU supports LSX and, in the absence of a working MLAS
+SIMD kernel, falls back to a generic build that mixes the 16-wide generic
+SGEMM pack with the 4-wide scalar SGEMM kernel. The resulting pack format
+mismatch silently produces wrong GEMM results (MatMul/Gemm/Conv), which on
+the 2K300 board manifests as deterministic garbage speech output from a
+streaming Zipformer ASR model.
+
+This patch adds an explicit, off-by-default CMake option
+onnxruntime_MLAS_FORCE_SCALAR. When enabled it:
+
+  * does not define MLAS_TARGET_LARCH64 (so no LSX/LASX headers or
+    intrinsics are used, and platform.cpp takes the generic path),
+  * skips the LoongArch SIMD source list in onnxruntime_mlas.cmake and
+    selects the generic scalar/*.cpp sources instead,
+  * switches the SGEMM pack to the 4-wide format that the scalar kernel
+    expects (the format upstream uses for MLAS_TARGET_WASM_SCALAR),
+  * keeps the ABI loongarch64 lp64d and does not pretend to be another
+    architecture.
+
+Other platforms are unaffected (the option defaults to OFF).
+
+Signed-off-by: buildroot-2k300 <buildroot@loongson.local>
+--- a/cmake/onnxruntime_mlas.cmake	2024-02-24 08:10:36.000000000 +0800
++++ b/cmake/onnxruntime_mlas.cmake	2026-08-06 12:31:28.805102362 +0800
+@@ -4,6 +4,13 @@
+ set(MLAS_ROOT ${ONNXRUNTIME_ROOT}/core/mlas)
+ set(MLAS_SRC_DIR ${MLAS_ROOT}/lib)
+ set(MLAS_INC_DIR ${MLAS_ROOT}/inc)
++#
++# Option to force the generic scalar MLAS implementation. Loongson 2K0300
++# has neither LSX nor LASX; forcing scalar avoids selecting the LoongArch
++# SIMD sources that require the LSX/LASX instruction sets.
++#
++option(onnxruntime_MLAS_FORCE_SCALAR "Force generic scalar MLAS implementation" OFF)
++
+ 
+ #
+ # All hardware agnostic source files here
+@@ -590,7 +597,7 @@
+           set(MLAS_SOURCE_IS_NOT_SET 0)
+         endif()
+     endif()
+-    if(LOONGARCH64 AND MLAS_SOURCE_IS_NOT_SET)
++    if(LOONGARCH64 AND MLAS_SOURCE_IS_NOT_SET AND NOT onnxruntime_MLAS_FORCE_SCALAR)
+         set(mlas_platform_srcs
+           ${MLAS_SRC_DIR}/qgemm_kernel_lsx.cpp
+           ${MLAS_SRC_DIR}/loongarch64/SgemmKernelLasx.S
+@@ -619,6 +626,10 @@
+ 
+ foreach(mlas_target ${ONNXRUNTIME_MLAS_LIBS})
+     target_include_directories(${mlas_target} PRIVATE ${MLAS_INC_DIR} ${MLAS_SRC_DIR})
++
++if(onnxruntime_MLAS_FORCE_SCALAR)
++    target_compile_definitions(${mlas_target} PRIVATE MLAS_FORCE_SCALAR=1)
++endif()
+     onnxruntime_add_include_to_target(${mlas_target} ${GSL_TARGET})
+ 
+     set_target_properties(${mlas_target} PROPERTIES FOLDER "ONNXRuntime")
+--- a/onnxruntime/core/mlas/inc/mlas.h	2024-02-24 08:10:36.000000000 +0800
++++ b/onnxruntime/core/mlas/inc/mlas.h	2026-08-06 12:31:28.829421720 +0800
+@@ -69,7 +69,7 @@
+ #endif
+ #endif
+ 
+-#if defined(__loongarch64)
++#if defined(__loongarch64) && defined(__loongarch_sx) && !defined(MLAS_FORCE_SCALAR)
+ #define MLAS_TARGET_LARCH64
+ #endif
+ //
+--- a/onnxruntime/core/mlas/lib/mlasi.h	2024-02-24 08:10:36.000000000 +0800
++++ b/onnxruntime/core/mlas/lib/mlasi.h	2026-08-06 12:31:28.856719792 +0800
+@@ -69,7 +69,7 @@
+ #undef pixel
+ #undef bool
+ #endif
+-#if defined(__loongarch64)
++#if defined(MLAS_TARGET_LARCH64)
+ #include <lsxintrin.h>
+ #endif
+ #if defined(MLAS_TARGET_WASM_SIMD)
+--- a/onnxruntime/core/mlas/lib/sgemm.cpp	2024-02-24 08:10:36.000000000 +0800
++++ b/onnxruntime/core/mlas/lib/sgemm.cpp	2026-08-06 12:31:28.885231067 +0800
+@@ -208,7 +208,7 @@
+     }
+ }
+ 
+-#if !defined(MLAS_TARGET_WASM_SCALAR)
++#if !defined(MLAS_TARGET_WASM_SCALAR) && !defined(MLAS_FORCE_SCALAR)
+ 
+ void
+ MlasSgemmCopyPackB(

@@ -33,25 +33,22 @@ ONNXRUNTIME_CONF_OPTS = \
 	-Donnxruntime_USE_XNNPACK=OFF \
 	-Donnxruntime_USE_MIMALLOC=OFF \
 	-Donnxruntime_USE_FULL_PROTOBUF=OFF \
+	-Donnxruntime_MLAS_FORCE_SCALAR=ON \
 	-DBUILD_PKGCONFIG_FILES=ON \
-	-DCMAKE_C_FLAGS="$(TARGET_CFLAGS) -march=loongarch64 -mtune=loongarch64 -mstrict-align" \
-	-DCMAKE_CXX_FLAGS="$(TARGET_CXXFLAGS) -march=loongarch64 -mtune=loongarch64 -mstrict-align" \
+	-DCMAKE_C_FLAGS="$(TARGET_CFLAGS) -march=loongarch64 -mtune=loongarch64 -mstrict-align -fno-strict-aliasing" \
+	-DCMAKE_CXX_FLAGS="$(TARGET_CXXFLAGS) -march=loongarch64 -mtune=loongarch64 -mstrict-align -fno-strict-aliasing" \
 	-DBUILD_SHARED_LIBS=OFF
 
-# Loongson 2K0300 has neither LSX nor LASX.
-# Prevent ONNX Runtime from selecting its LoongArch SIMD MLAS kernels.
-define ONNXRUNTIME_DISABLE_LOONGARCH_SIMD
-	test "$$(grep -c 'set(LOONGARCH64 TRUE)' \
-		$(@D)/cmake/onnxruntime_mlas.cmake)" -eq 1
-	$(SED) 's|set(LOONGARCH64 TRUE)|message(STATUS "Generic LoongArch64: using scalar MLAS without LSX/LASX")|' \
-		$(@D)/cmake/onnxruntime_mlas.cmake
-	grep -q 'Generic LoongArch64: using scalar MLAS without LSX/LASX' \
-		$(@D)/cmake/onnxruntime_mlas.cmake
-	! grep -q 'set(LOONGARCH64 TRUE)' \
-		$(@D)/cmake/onnxruntime_mlas.cmake
-endef
-
-ONNXRUNTIME_POST_PATCH_HOOKS += ONNXRUNTIME_DISABLE_LOONGARCH_SIMD
+# The LoongArch MLAS scalar mode is applied by the patch
+# 0001-mlas-add-generic-scalar-mode-for-loongarch64.patch:
+# - Loongson 2K0300 has neither LSX nor LASX, so we enable the new
+#   onnxruntime_MLAS_FORCE_SCALAR option (set above to ON).
+# - With the option ON, MLAS_TARGET_LARCH64 is not defined, no LSX/LASX
+#   source is compiled, and the generic scalar/*.cpp sources are selected.
+# - The patch also switches the SGEMM packing to the 4-wide format that the
+#   scalar kernel expects (upstream uses this format for
+#   MLAS_TARGET_WASM_SCALAR). Without this, the 16-wide generic pack and the
+#   4-wide scalar kernel are mixed, producing wrong GEMM results.
 
 # GitLab regenerated the archive for the same Eigen commit.
 # ONNX Runtime 1.17.1 still contains the old archive SHA1.
@@ -95,31 +92,5 @@ define ONNXRUNTIME_DISABLE_BROKEN_CMAKE_EXPORT
 endef
 
 ONNXRUNTIME_POST_PATCH_HOOKS += ONNXRUNTIME_DISABLE_BROKEN_CMAKE_EXPORT
-
-# ONNX Runtime 1.17.1 assumes that every LoongArch64 CPU supports LSX.
-# Loongson 2K0300 has no LSX/LASX, so keep MLAS on its scalar path.
-define ONNXRUNTIME_FIX_GENERIC_LOONGARCH_MLAS_HEADERS
-	test "$$(grep -c '^#if defined(__loongarch64)$$' \
-		$(@D)/onnxruntime/core/mlas/inc/mlas.h)" -eq 1
-	$(SED) \
-		's/^#if defined(__loongarch64)$$/#if defined(__loongarch64) \&\& defined(__loongarch_sx)/' \
-		$(@D)/onnxruntime/core/mlas/inc/mlas.h
-
-	test "$$(grep -c '^#if defined(__loongarch64)$$' \
-		$(@D)/onnxruntime/core/mlas/lib/mlasi.h)" -eq 1
-	$(SED) \
-		's/^#if defined(__loongarch64)$$/#if defined(MLAS_TARGET_LARCH64)/' \
-		$(@D)/onnxruntime/core/mlas/lib/mlasi.h
-
-	grep -q \
-		'^#if defined(__loongarch64) && defined(__loongarch_sx)$$' \
-		$(@D)/onnxruntime/core/mlas/inc/mlas.h
-	grep -q \
-		'^#if defined(MLAS_TARGET_LARCH64)$$' \
-		$(@D)/onnxruntime/core/mlas/lib/mlasi.h
-endef
-
-ONNXRUNTIME_POST_PATCH_HOOKS += \
-	ONNXRUNTIME_FIX_GENERIC_LOONGARCH_MLAS_HEADERS
 
 $(eval $(cmake-package))
