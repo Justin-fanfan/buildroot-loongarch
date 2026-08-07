@@ -13,6 +13,10 @@
 *.rej
 *~
 *.pyc
-/rootfs-hybrid/
+/rootfs-hybrid/install
+/rootfs-hybrid/reports*
+/rootfs-hybrid/rootfs
+/rootfs-hybrid/docs
+/rootfs-hybrid/fakeroot.db
 *ort-validation*
 /.config*

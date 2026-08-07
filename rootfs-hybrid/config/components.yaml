@@ -1,0 +1,169 @@
+# ============================================================================
+# components.yaml — manifest-driven merge configuration
+#
+# Used by scripts/merge-components.py (via build-hybrid-rootfs.sh).
+#
+# protected_paths
+#   Rootfs-relative globs (leading '/' optional). Files already present in the
+#   base rootfs under these paths are NEVER overwritten by a component copy.
+#   (New files under such dirs are allowed, so a package may ship its own
+#   /usr/lib/systemd/system/foo.service or /etc config that did not exist.)
+#   `/lib/**` is treated as an alias of `/usr/lib/**`.
+#
+# components
+#   Each entry supports:
+#     enabled     (bool)  default true
+#     include     (list)  rootfs-relative globs matched against QT6_TARGET
+#     exclude     (list)  rootfs-relative globs subtracted from matches
+#     optional    (bool)  default false; missing optional component -> warn only
+#     destination (str)   optional rootfs dir prefix to place matched files
+#     post_install(str)   optional shell snippet run (as root, under fakeroot)
+#                         after the component copy; $ROOTFS is exported.
+#
+# ELF files matched by any include are automatically passed through the
+# recursive DT_NEEDED dependency resolver, which copies missing non-protected
+# shared libraries from QT6_TARGET (no need to list them here).
+# ============================================================================
+
+protected_paths:
+  - /boot/**
+  - /lib/modules/**
+  - /lib/firmware/**
+  - /lib/ld-*.so*
+  - /lib/libc.so*
+  - /lib/libpthread.so*
+  - /lib/libm.so*
+  - /lib/libdl.so*
+  - /lib/libresolv.so*
+  - /lib/libnss_*
+  - /lib/libgcc_s.so*
+  - /usr/lib/libstdc++.so*
+  - /usr/lib/systemd/**
+  - /etc/**
+
+components:
+  # glibc UTF-8 locale required by Qt6.  The base board rootfs may contain
+  # /etc/locale.conf but not the compiled locale archive; without this file
+  # setlocale("C.UTF-8") fails and Qt falls back to ANSI_X3.4-1968.
+  locale:
+    enabled: true
+    include:
+      - /usr/lib/locale/locale-archive
+    post_install: |
+      mkdir -p "$ROOTFS/etc/profile.d"
+      cat > "$ROOTFS/etc/profile.d/locale.sh" <<'LOCALEEOF'
+      # Qt6 requires a UTF-8 locale.  Keep LC_ALL unset so applications may
+      # override individual LC_* categories when needed.
+      export LANG=C.UTF-8
+      LOCALEEOF
+      chmod 644 "$ROOTFS/etc/profile.d/locale.sh"
+      if [ ! -e "$ROOTFS/etc/locale.conf" ]; then
+        printf '%s\n' 'LANG="C.UTF-8"' > "$ROOTFS/etc/locale.conf"
+        chmod 644 "$ROOTFS/etc/locale.conf"
+      fi
+
+  qt6:
+    enabled: true
+    include:
+      - /usr/lib/libQt6*.so*
+      - /usr/lib/qt6/**
+      # - /usr/share/qt6/**
+      - /usr/share/fonts/**
+    exclude:
+      - "**/*.a"
+      - "**/cmake/**"
+      - "**/pkgconfig/**"
+      - "**/examples/**"
+      - "**/tests/**"
+      - /usr/lib/qt6/metatypes/**
+      - /usr/lib/qt6/modules/**
+      - /usr/lib/qt6/libexec/**
+      - /usr/lib/qt6/sbom/**
+      - /usr/lib/qt6/plugins/qmllint/**
+    # Board integration: linuxfb + virtual keyboard environment. $ROOTFS is
+    # exported by merge-components.py when post_install runs.
+    post_install: |
+      mkdir -p "$ROOTFS/etc/profile.d"
+      cat > "$ROOTFS/etc/profile.d/qt6.sh" <<'QTEOF'
+      export QT_QPA_PLATFORM=linuxfb
+      export QT_QPA_FB_TSLIB=1
+      export QT_IM_MODULE=qtvirtualkeyboard
+      export QT_QUICK_BACKEND=software
+      export QT_PLUGIN_PATH=/usr/lib/qt6/plugins
+      export QT_QPA_PLATFORM_PLUGIN_PATH=/usr/lib/qt6/plugins/platforms
+      export QML_IMPORT_PATH=/usr/lib/qt6/qml
+      export QML2_IMPORT_PATH=/usr/lib/qt6/qml
+      QTEOF
+      chmod 644 "$ROOTFS/etc/profile.d/qt6.sh"
+
+  opencv:
+    enabled: true
+    include:
+      - /usr/lib/libopencv_*.so*
+      - /usr/lib/python3.12/site-packages/cv2/**
+    exclude:
+      - "**/*.a"
+      - "**/include/**"
+      - "**/tests/**"
+
+  numpy:
+    enabled: true
+    include:
+      - /usr/lib/python3.12/site-packages/numpy/**
+      - /usr/lib/python3.12/site-packages/numpy-*.dist-info/**
+      - /usr/lib/python3.12/site-packages/numpy.libs/**
+    exclude:
+      - "**/tests/**"
+      - "**/doc/**"
+      - "**/core/include/**"
+      - "**/f2py/src/**"
+
+  sounddevice:
+    enabled: true
+    include:
+      - /usr/lib/python3.12/site-packages/sounddevice*
+      - /usr/lib/python3.12/site-packages/_cffi_backend*.so
+      - /usr/lib/python3.12/site-packages/cffi/**
+      - /usr/lib/python3.12/site-packages/cffi-*.dist-info/**
+      - /usr/lib/python3.12/site-packages/pycparser/**
+      - /usr/lib/python3.12/site-packages/pycparser-*.dist-info/**
+      - /usr/lib/libportaudio.so*
+
+  onnxruntime:
+    enabled: true
+    include:
+      - /usr/lib/libonnxruntime.so*
+      - /usr/lib/libonnxruntime_providers_*.so*
+
+  sherpa_onnx:
+    enabled: true
+    include:
+      - /usr/lib/python3.12/site-packages/sherpa_onnx/**
+      - /usr/lib/python3.12/site-packages/sherpa_onnx-*.dist-info/**
+    exclude:
+      - "**/*.pc"
+
+  ffmpeg:
+    enabled: true
+    include:
+      - /usr/bin/ffmpeg
+      - /usr/bin/ffprobe
+      - /usr/lib/libavcodec.so*
+      - /usr/lib/libavformat.so*
+      - /usr/lib/libavutil.so*
+      - /usr/lib/libswscale.so*
+      - /usr/lib/libswresample.so*
+      - /usr/lib/libavdevice.so*
+      - /usr/lib/libavfilter.so*
+
+  # The application project. Disabled until its build output is installed into
+  # QT6_TARGET (e.g. /opt/fanfan/**, /usr/bin/fanfan-*, systemd units).
+  project:
+    enabled: false
+    optional: true
+    include:
+      - /opt/fanfan/**
+      - /usr/bin/fanfan-*
+      - /usr/lib/systemd/system/fanfan-*.service
+
+future_components: {}
