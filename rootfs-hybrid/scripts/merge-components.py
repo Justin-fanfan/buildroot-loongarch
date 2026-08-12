@@ -174,6 +174,27 @@ def destination_rel(source_rel: str, destination: str | None) -> str:
     return normalize(destination) + "/" + normalize(source_rel)
 
 
+def usable_matches_for_pattern(spec: dict, protected: list[str], pattern: str) -> list[str]:
+    """Return matches that survive exclude rules and protected-destination checks."""
+    exclude = spec.get("exclude", []) or []
+    destination = spec.get("destination")
+    hits = expand_include(str(pattern))
+    return sorted(
+        r
+        for r in hits
+        if not matches_any(r, exclude)
+        and not is_protected_dest(destination_rel(r, destination), protected)
+    )
+
+
+def required_misses(spec: dict, protected: list[str]) -> list[str]:
+    """Return required glob patterns with no usable source match."""
+    required = spec.get("require", []) or []
+    if not isinstance(required, list):
+        raise ValueError("component require must be a list")
+    return [str(pat) for pat in required if not usable_matches_for_pattern(spec, protected, str(pat))]
+
+
 def match_component(spec: dict, protected: list[str]) -> tuple[list[str], list[str]]:
     include = spec.get("include", []) or []
     exclude = spec.get("exclude", []) or []
@@ -217,12 +238,13 @@ def main() -> int:
     if args.list:
         for name, spec in components.items():
             print(
-                "%-16s enabled=%-5s optional=%-5s include=%d"
+                "%-16s enabled=%-5s optional=%-5s include=%d require=%d"
                 % (
                     name,
                     spec.get("enabled", True),
                     spec.get("optional", False),
                     len(spec.get("include", []) or []),
+                    len(spec.get("require", []) or []),
                 )
             )
         return 0
@@ -234,33 +256,30 @@ def main() -> int:
         spec = components[args.check]
         kept, skipped = match_component(spec, protected)
         misses = []
-        excludes = spec.get("exclude", []) or []
         for pat in spec.get("include", []) or []:
-            hits = expand_include(str(pat))
-            destination = spec.get("destination")
-            usable = [
-                r
-                for r in hits
-                if not matches_any(r, excludes)
-                and not is_protected_dest(destination_rel(r, destination), protected)
-            ]
-            if not usable:
+            if not usable_matches_for_pattern(spec, protected, str(pat)):
                 misses.append(str(pat))
+        req_misses = required_misses(spec, protected)
         print("component: %s" % args.check)
         print("  include patterns: %d" % len(spec.get("include", []) or []))
+        print("  required patterns: %d" % len(spec.get("require", []) or []))
         print("  kept paths: %d" % len(kept))
         print("  protected-existing paths skipped: %d" % len(skipped))
-        print("  patterns with no kept paths: %d" % len(misses))
+        print("  include patterns with no kept paths: %d" % len(misses))
         for p in misses:
             print("    (no files) %s" % p)
+        print("  REQUIRED patterns missing: %d" % len(req_misses))
+        for p in req_misses:
+            print("    (REQUIRED MISSING) %s" % p)
         for r in kept[:25]:
             print("    %s" % r)
         if len(kept) > 25:
             print("    ... (%d more)" % (len(kept) - 25))
-        return 0
+        return 2 if req_misses else 0
 
     installed: dict[str, list[str]] = {}
     missing: list[str] = []
+    missing_required: list[str] = []
     skipped_protected: list[str] = []
     bad_arch: list[str] = []
     elf_roots: list[str] = []
@@ -274,10 +293,20 @@ def main() -> int:
 
         try:
             kept, skipped = match_component(spec, protected)
+            req_misses = required_misses(spec, protected)
         except Exception as exc:
             print(f"[FAIL] component '{name}': {exc}")
             return 1
         skipped_protected.extend(f"{name}: {r}" for r in skipped)
+
+        if req_misses:
+            for pat in req_misses:
+                missing_required.append(f"{name}: {pat}")
+            print("[FAIL] component '%s': %d required runtime pattern(s) missing" % (name, len(req_misses)))
+            for pat in req_misses:
+                print("       REQUIRED MISSING: %s" % pat)
+            installed[name] = kept
+            continue
 
         if not kept:
             if optional:
@@ -345,6 +374,11 @@ def main() -> int:
         for name in missing:
             f.write("%s\n" % name)
 
+    with open(os.path.join(REPORTS, "components-required-missing.txt"), "w", encoding="utf-8") as f:
+        f.write("# components-required-missing.txt (header-only = all required runtime patterns present)\n")
+        for item in missing_required:
+            f.write(item + "\n")
+
     with open(
         os.path.join(REPORTS, "components-protected-skipped.txt"), "w", encoding="utf-8"
     ) as f:
@@ -362,15 +396,19 @@ def main() -> int:
                 f.write(e + "\n")
 
     print()
-    print("components-installed.txt: %s" % os.path.join(REPORTS, "components-installed.txt"))
-    print("components-missing.txt  : %s" % os.path.join(REPORTS, "components-missing.txt"))
-    print("protected-skipped       : %d" % len(set(skipped_protected)))
-    print("elf-roots for resolver  : %d" % (0 if args.dry_run else len(set(elf_roots))))
+    print("components-installed.txt        : %s" % os.path.join(REPORTS, "components-installed.txt"))
+    print("components-missing.txt          : %s" % os.path.join(REPORTS, "components-missing.txt"))
+    print("components-required-missing.txt : %s" % os.path.join(REPORTS, "components-required-missing.txt"))
+    print("protected-skipped               : %d" % len(set(skipped_protected)))
+    print("elf-roots for resolver          : %d" % (0 if args.dry_run else len(set(elf_roots))))
 
     if bad_arch:
         print("BAD ARCHITECTURE files:")
         for r in sorted(set(bad_arch)):
             print("  %s" % r)
+        return 1
+    if missing_required:
+        print("FATAL: %d required runtime pattern(s) missing" % len(missing_required))
         return 1
     if missing and not args.dry_run:
         print("FATAL: %d required component(s) had no files" % len(missing))
