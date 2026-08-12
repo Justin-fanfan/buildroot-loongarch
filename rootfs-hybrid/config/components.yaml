@@ -14,6 +14,9 @@
 #   Each entry supports:
 #     enabled     (bool)  default true
 #     include     (list)  rootfs-relative globs matched against QT6_TARGET
+#     require     (list)  rootfs-relative globs that must each have at least
+#                         one usable match; missing required runtime pieces are
+#                         fatal even when other include patterns matched
 #     exclude     (list)  rootfs-relative globs subtracted from matches
 #     optional    (bool)  default false; missing optional component -> warn only
 #     destination (str)   optional rootfs dir prefix to place matched files
@@ -122,12 +125,21 @@ components:
     enabled: true
     include:
       - /usr/lib/python3.12/site-packages/sounddevice*
+      - /usr/lib/python3.12/site-packages/_sounddevice*
       - /usr/lib/python3.12/site-packages/_cffi_backend*.so
       - /usr/lib/python3.12/site-packages/cffi/**
       - /usr/lib/python3.12/site-packages/cffi-*.dist-info/**
       - /usr/lib/python3.12/site-packages/pycparser/**
       - /usr/lib/python3.12/site-packages/pycparser-*.dist-info/**
       - /usr/lib/libportaudio.so*
+    # sounddevice is a CFFI package: sounddevice.pyc alone is not a complete
+    # runtime.  _sounddevice.pyc is imported by sounddevice and PortAudio is
+    # loaded at runtime, so neither dependency is discoverable via DT_NEEDED.
+    require:
+      - /usr/lib/python3.12/site-packages/sounddevice.pyc
+      - /usr/lib/python3.12/site-packages/_sounddevice.pyc
+      - /usr/lib/python3.12/site-packages/_cffi_backend*.so
+      - /usr/lib/libportaudio.so.2
 
   onnxruntime:
     enabled: true
