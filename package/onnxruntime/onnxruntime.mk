@@ -39,7 +39,7 @@ ONNXRUNTIME_CONF_OPTS = \
 	-DBUILD_SHARED_LIBS=OFF
 
 ifeq ($(BR2_PACKAGE_ONNXRUNTIME_PYTHON),y)
-ONNXRUNTIME_DEPENDENCIES += python3 python-numpy host-python-numpy
+ONNXRUNTIME_DEPENDENCIES += python3 python-numpy
 ONNXRUNTIME_CONF_OPTS += \
 	-Donnxruntime_ENABLE_PYTHON=ON \
 	-DPython_EXECUTABLE="$(HOST_DIR)/bin/python3" \
