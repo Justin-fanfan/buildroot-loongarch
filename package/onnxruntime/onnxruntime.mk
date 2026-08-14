@@ -20,7 +20,6 @@ ONNXRUNTIME_CONF_OPTS = \
 	-Donnxruntime_CROSS_COMPILING=ON \
 	-Donnxruntime_BUILD_UNIT_TESTS=OFF \
 	-Donnxruntime_BUILD_BENCHMARKS=OFF \
-	-Donnxruntime_ENABLE_PYTHON=OFF \
 	-Donnxruntime_ENABLE_TRAINING=OFF \
 	-Donnxruntime_ENABLE_TRAINING_OPS=OFF \
 	-Donnxruntime_ENABLE_LTO=OFF \
@@ -38,6 +37,36 @@ ONNXRUNTIME_CONF_OPTS = \
 	-DCMAKE_C_FLAGS="$(TARGET_CFLAGS) -march=loongarch64 -mtune=loongarch64 -mstrict-align -fno-strict-aliasing" \
 	-DCMAKE_CXX_FLAGS="$(TARGET_CXXFLAGS) -march=loongarch64 -mtune=loongarch64 -mstrict-align -fno-strict-aliasing" \
 	-DBUILD_SHARED_LIBS=OFF
+
+ifeq ($(BR2_PACKAGE_ONNXRUNTIME_PYTHON),y)
+ONNXRUNTIME_DEPENDENCIES += python3 python-numpy host-python-numpy
+ONNXRUNTIME_CONF_OPTS += \
+	-Donnxruntime_ENABLE_PYTHON=ON \
+	-DPython_EXECUTABLE="$(HOST_DIR)/bin/python3" \
+	-DPython_INCLUDE_DIR="$(STAGING_DIR)/usr/include/python$(PYTHON3_VERSION_MAJOR)" \
+	-DPython_NumPy_INCLUDE_DIR="$(STAGING_DIR)/usr/lib/python$(PYTHON3_VERSION_MAJOR)/site-packages/numpy/core/include"
+
+ONNXRUNTIME_PYTHON_SITE_PACKAGES = \
+	/usr/lib/python$(PYTHON3_VERSION_MAJOR)/site-packages
+
+define ONNXRUNTIME_INSTALL_PYTHON_BINDINGS
+	test -f $(ONNXRUNTIME_BUILDDIR)/onnxruntime/__init__.py
+	test -f \
+		$(ONNXRUNTIME_BUILDDIR)/onnxruntime/capi/onnxruntime_pybind11_state.so
+	$(INSTALL) -d \
+		$(TARGET_DIR)$(ONNXRUNTIME_PYTHON_SITE_PACKAGES)
+	rm -rf \
+		$(TARGET_DIR)$(ONNXRUNTIME_PYTHON_SITE_PACKAGES)/onnxruntime
+	cp -a \
+		$(ONNXRUNTIME_BUILDDIR)/onnxruntime \
+		$(TARGET_DIR)$(ONNXRUNTIME_PYTHON_SITE_PACKAGES)/
+endef
+
+ONNXRUNTIME_POST_INSTALL_TARGET_HOOKS += \
+	ONNXRUNTIME_INSTALL_PYTHON_BINDINGS
+else
+ONNXRUNTIME_CONF_OPTS += -Donnxruntime_ENABLE_PYTHON=OFF
+endif
 
 # The LoongArch MLAS scalar mode is applied by the patch
 # 0001-mlas-add-generic-scalar-mode-for-loongarch64.patch:
