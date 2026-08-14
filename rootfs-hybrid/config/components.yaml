@@ -147,6 +147,20 @@ components:
       - /usr/lib/libonnxruntime.so*
       - /usr/lib/libonnxruntime_providers_*.so*
 
+  # Python binding assembled by ONNX Runtime's onnxruntime_python.cmake.
+  # Keep this separate from the C/C++ runtime component so the hybrid merge
+  # reports a missing pybind module explicitly instead of silently producing
+  # a rootfs where `import onnxruntime` cannot work.
+  onnxruntime_python:
+    enabled: true
+    include:
+      - /usr/lib/python3.12/site-packages/onnxruntime/**
+    require:
+      - /usr/lib/python3.12/site-packages/onnxruntime/capi/onnxruntime_pybind11_state.so
+    exclude:
+      - "**/tests/**"
+      - "**/*.a"
+
   sherpa_onnx:
     enabled: true
     include:

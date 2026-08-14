@@ -11,3 +11,17 @@ config BR2_PACKAGE_ONNXRUNTIME
 	  without LSX or LASX.
 
 	  https://onnxruntime.ai/
+
+if BR2_PACKAGE_ONNXRUNTIME
+
+config BR2_PACKAGE_ONNXRUNTIME_PYTHON
+	bool "Python bindings"
+	depends on BR2_PACKAGE_PYTHON3
+	depends on BR2_PACKAGE_PYTHON_NUMPY_ARCH_SUPPORTS
+	depends on BR2_TOOLCHAIN_USES_GLIBC || BR2_TOOLCHAIN_USES_MUSL
+	select BR2_PACKAGE_PYTHON_NUMPY
+	help
+	  Build and install the ONNX Runtime Python bindings so that
+	  applications can use the runtime through "import onnxruntime".
+
+endif
